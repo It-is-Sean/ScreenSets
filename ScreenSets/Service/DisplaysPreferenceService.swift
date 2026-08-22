@@ -9,12 +9,9 @@ import CoreGraphics
 import Foundation
 
 protocol DisplaysPreferenceServiceProtocal {
-    func getCurrentDisplayPreset() -> DisplayPreset
-    func getCurrentDisplayUUIDs() -> [UUID]
-    func getPresetUUIDFromPreset() -> UUID?
-    func changePreset(uuid: UUID, newPreset: DisplayPreset)
-    func newPreset(preset: DisplayPreset)
-    func applyPreset(id: UUID)
+    func applyPreset(preset: DisplayPreset) throws
+    func getCurrentPreset() throws -> DisplayPreset
+
 }
 
 enum DisplaysPreferenceServiceError: Error {
@@ -29,7 +26,7 @@ enum DisplaysPreferenceServiceError: Error {
     case FailedToSaveConfiguration
 }
 
-final class DisplaysPreferenceService {
+final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
 
     private func getCurrentDisplayDirectIDs() -> [CGDirectDisplayID] {
         // WARN: U should check the value returned by CoreGraphics
