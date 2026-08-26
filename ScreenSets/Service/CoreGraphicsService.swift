@@ -1,5 +1,3 @@
-import ColorSync
-import CoreGraphics
 //
 //  DisplaysPreferenceService.swift
 //  ScreenSets
@@ -7,14 +5,16 @@ import CoreGraphics
 //  Created by Sean on 2026/8/20.
 //
 import Foundation
+import ColorSync
+import CoreGraphics
 
-protocol DisplaysPreferenceServiceProtocal {
+protocol CoreGraphicsServiceProtocol {
     func applyPreset(preset: DisplayPreset) throws
-    func getCurrentPreset() throws -> DisplayPreset
+    func getCurrentDisplaysPreference() throws -> [DisplaySettings]
 
 }
 
-enum DisplaysPreferenceServiceError: Error {
+enum CoreGraphicServiceError: Error {
     case InitDisplayConfigureationError
     case FailedToGetDisplayModes
     case FailedToGetDisplayUUID
@@ -26,7 +26,7 @@ enum DisplaysPreferenceServiceError: Error {
     case FailedToSaveConfiguration
 }
 
-final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
+final class CoreGraphicsService: CoreGraphicsServiceProtocol {
 
     private func getCurrentDisplayDirectIDs() -> [CGDirectDisplayID] {
         // WARN: U should check the value returned by CoreGraphics
@@ -48,7 +48,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
         let directDisplayID = CGDisplayGetDisplayIDFromUUID(settings.displayUUID.cfUUID)
         guard let modes = CGDisplayCopyAllDisplayModes(directDisplayID, nil) as? [CGDisplayMode]
         else {
-            throw DisplaysPreferenceServiceError.FailedToGetDisplayModes
+            throw CoreGraphicServiceError.FailedToGetDisplayModes
         }
 
         guard
@@ -59,7 +59,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
                     && $0.refreshRate == settings.mode.refreshRate
             })
         else {
-            throw DisplaysPreferenceServiceError.NoMatchingMode
+            throw CoreGraphicServiceError.NoMatchingMode
         }
         return matchedMode
 
@@ -76,14 +76,14 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
             CGConfigureDisplayOrigin(config, directDisplayID, settings.originX, settings.originY)
                 == .success
         else {
-            throw DisplaysPreferenceServiceError.FailedToSetDisplayOrigin
+            throw CoreGraphicServiceError.FailedToSetDisplayOrigin
         }
 
         // Configure display mode
         guard
             CGConfigureDisplayWithDisplayMode(config, directDisplayID, matchedMode, nil) == .success
         else {
-            throw DisplaysPreferenceServiceError.FailedToSetDisplayMode
+            throw CoreGraphicServiceError.FailedToSetDisplayMode
         }
 
         // Configure display mirroring
@@ -94,7 +94,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
                 CGConfigureDisplayMirrorOfDisplay(config, directDisplayID, mirroringMaterDirectID)
                     == .success
             else {
-                throw DisplaysPreferenceServiceError.FailedToSetMirroringMaster
+                throw CoreGraphicServiceError.FailedToSetMirroringMaster
             }
         } else {
             // UNSET THE POTENTIAL MIRRORING STAUS
@@ -102,7 +102,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
                 CGConfigureDisplayMirrorOfDisplay(config, directDisplayID, kCGNullDirectDisplay)
                     == .success
             else {
-                throw DisplaysPreferenceServiceError.FailedToSetMirroringMaster
+                throw CoreGraphicServiceError.FailedToSetMirroringMaster
             }
         }
     }
@@ -111,14 +111,14 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
     func applyPreset(preset: DisplayPreset) throws {
         let currentDisplayUUIDs = try getCurrentDisplayUUIDs()
         guard preset.isAvaiable(currentDisplayUUIDs: currentDisplayUUIDs) else {
-            throw DisplaysPreferenceServiceError.MissingDisplay
+            throw CoreGraphicServiceError.MissingDisplay
         }
 
         // Start Transaction
         var config: CGDisplayConfigRef?
         guard CGBeginDisplayConfiguration(&config) == .success, let config
         else {
-            throw DisplaysPreferenceServiceError.InitDisplayConfigureationError
+            throw CoreGraphicServiceError.InitDisplayConfigureationError
         }
 
         do {
@@ -134,7 +134,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
         }
         // If no error is thrown, save the configuration
         guard CGCompleteDisplayConfiguration(config, .permanently) == .success else {
-            throw DisplaysPreferenceServiceError.FailedToSaveConfiguration
+            throw CoreGraphicServiceError.FailedToSaveConfiguration
         }
     }
 
@@ -150,7 +150,7 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
 
         // Get current display mode
         guard let mode = CGDisplayCopyDisplayMode(displayID) else {
-            throw DisplaysPreferenceServiceError.FailedToGetDisplayModes
+            throw CoreGraphicServiceError.FailedToGetDisplayModes
         }
         let modePreference = DisplayModePreference(
             width: mode.width, height: mode.height, pixelWidth: mode.pixelWidth,
@@ -171,16 +171,14 @@ final class DisplaysPreferenceService: DisplaysPreferenceServiceProtocal {
         return displaySetting
     }
 
-    func getCurrentPreset() throws -> DisplayPreset {
+    func getCurrentDisplaysPreference() throws -> [DisplaySettings] {
         let displayDirectIDs = getCurrentDisplayDirectIDs()
         var displaysPreference: [DisplaySettings] = []
         for directID in displayDirectIDs {
             displaysPreference.append(try getDisplaySetting(displayID: directID))
         }
 
-        return DisplayPreset(
-            displayPreferences: displaysPreference
-        )
+        return displaysPreference
 
     }
 }

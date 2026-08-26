@@ -20,7 +20,7 @@ extension UUID {
             let cfUUID = CGDisplayCreateUUIDFromDisplayID(displayID)?.takeRetainedValue(),
             let uuid = UUID(uuidString: CFUUIDCreateString(nil, cfUUID) as String)
         else {
-            throw DisplaysPreferenceServiceError.FailedToGetDisplayUUID
+            throw CoreGraphicServiceError.FailedToGetDisplayUUID
         }
         return uuid
     }

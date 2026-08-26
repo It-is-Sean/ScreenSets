@@ -24,4 +24,8 @@ extension Logger {
         subsystem: subsystem,
         category: "Storage"
     )
+    static let service = Logger(
+        subsystem: subsystem,
+        category: "Service"
+    )
 }

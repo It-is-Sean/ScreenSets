@@ -9,9 +9,28 @@ import SwiftUI
 
 @main
 struct ScreenSetsApp: App {
+    @State private var screenSetsService: ScreenSetsService
+    @State private var appPreferences: AppPreferences
+    init(){
+        let di = AppDI.live()
+        _screenSetsService = State(
+            initialValue: di.screenSetsService
+        )
+
+        _appPreferences = State(
+            initialValue: di.appPreferences
+        )
+    }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environment(screenSetsService)
+                .environment(appPreferences)
+                .frame(minWidth: 720, minHeight: 520)
+                .containerBackground(.thickMaterial, for: .window)
+
         }
+        .windowStyle(.hiddenTitleBar)
+
     }
 }
