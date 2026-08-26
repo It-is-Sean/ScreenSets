@@ -14,6 +14,7 @@ struct DisplayModePreference: Codable {
     let pixelHeight: Int
 
     let refreshRate: Double
+
 }
 
 final class DisplaySettings: Decodable, Encodable {
@@ -41,6 +42,7 @@ final class DisplaySettings: Decodable, Encodable {
             && mirroringMaster == other.mirroringMaster
     }
 }
+
 final class DisplayPreset: Decodable, Encodable {
     let id: UUID
     let name: String
@@ -79,6 +81,37 @@ final class DisplayPreset: Decodable, Encodable {
                 return false
             }
             return expected.matches(actual)
+        }
+    }
+    // let mirrorMasterUUIDs = Set(
+    //     settings.compactMap(\.mirroringMaster)
+    // )
+    //
+    // 然后分类：
+    //
+    // mirroringMaster != nil
+    //     → 镜像从屏
+    //
+    // mirroringMaster == nil 且 UUID 被其他显示器引用
+    //     → 镜像主屏
+    //
+    // mirroringMaster == nil 且没有被引用
+    //     → 独立显示器
+    func getMirroringDisplaySettings() -> [DisplaySettings] {
+        return displayPreferences.filter {
+            $0.mirroringMaster != nil
+        }
+
+    }
+
+    private func getMirroredDisplayIndexs() -> [UUID] {
+        return Array(Set(displayPreferences.compactMap(\.mirroringMaster)))
+    }
+
+    func getMirroredDisplayPreferences() -> [DisplaySettings] {
+        let masterUUIDs = getMirroredDisplayIndexs()
+        return displayPreferences.filter {
+            masterUUIDs.contains($0.displayUUID)
         }
     }
 

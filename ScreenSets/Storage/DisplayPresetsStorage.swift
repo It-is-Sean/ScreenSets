@@ -44,5 +44,6 @@ final class DisplayPresetsStorage {
         }
         defaults.set(data, forKey: key)
     }
+    
 
 }

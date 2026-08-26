@@ -46,7 +46,11 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
 
     private func getMatchedMode(settings: DisplaySettings) throws -> CGDisplayMode {
         let directDisplayID = CGDisplayGetDisplayIDFromUUID(settings.displayUUID.cfUUID)
-        guard let modes = CGDisplayCopyAllDisplayModes(directDisplayID, nil) as? [CGDisplayMode]
+        let options = [
+              kCGDisplayShowDuplicateLowResolutionModes: true
+          ] as CFDictionary
+        
+        guard let modes = CGDisplayCopyAllDisplayModes(directDisplayID, options) as? [CGDisplayMode]
         else {
             throw CoreGraphicServiceError.FailedToGetDisplayModes
         }
@@ -56,7 +60,7 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
                 $0.width == settings.mode.width && $0.height == settings.mode.height
                     && $0.pixelWidth == settings.mode.pixelWidth
                     && $0.pixelHeight == settings.mode.pixelHeight
-                    && $0.refreshRate == settings.mode.refreshRate
+                    && abs($0.refreshRate - settings.mode.refreshRate) < 0.01
             })
         else {
             throw CoreGraphicServiceError.NoMatchingMode
