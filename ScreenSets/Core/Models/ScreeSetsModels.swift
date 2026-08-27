@@ -51,7 +51,7 @@ final class DisplaySettings: Decodable, Encodable {
     }
 }
 
-final class DisplayPreset: Decodable, Encodable {
+final class DisplayPreset: Decodable, Encodable ,Identifiable{
     let id: UUID
     let name: String
     var displayUUIDs: [UUID]

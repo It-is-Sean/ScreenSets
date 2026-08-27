@@ -19,6 +19,7 @@ struct PageTitle: View {
     }
 }
 
+
 #Preview {
     PageTitle(text: "Details")
 }

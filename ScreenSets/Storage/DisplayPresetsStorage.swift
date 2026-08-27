@@ -8,12 +8,17 @@
 import Foundation
 import OSLog
 
+protocol DisplayPresetsStorageProtocol {
+    func initDisplayPresets() -> [DisplayPreset]
+    func loadDisplayPresets() throws -> [DisplayPreset]
+    func saveDisplayPresets(_ displayPreferences: [DisplayPreset]) throws
+}
 
 enum DisplayPreferenceStorageError: Error {
     case dataNotFound
 }
 
-final class DisplayPresetsStorage {
+final class DisplayPresetsStorage: DisplayPresetsStorageProtocol {
     private let key = "displayPreferences"
     private let defaults: UserDefaults
 
@@ -25,6 +30,9 @@ final class DisplayPresetsStorage {
         let defaultsDisplayPrefernce: [DisplayPreset] = []
         do { try saveDisplayPresets(defaultsDisplayPrefernce) } catch {
             // TODO: Handel Error from saveAlarmPreference()
+            Logger.service.error(
+                "Failed to init DisplayPresets: \(error.localizedDescription, privacy: .public)"
+            )
         }
         return defaultsDisplayPrefernce
     }
@@ -44,6 +52,5 @@ final class DisplayPresetsStorage {
         }
         defaults.set(data, forKey: key)
     }
-    
 
 }

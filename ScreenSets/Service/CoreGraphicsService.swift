@@ -10,6 +10,7 @@ import Foundation
 
 protocol CoreGraphicsServiceProtocol {
     func applyPreset(preset: DisplayPreset) throws
+    func isPresetAvailable(preset: DisplayPreset) throws -> Bool
     func getCurrentDisplaysPreference() throws -> [DisplaySettings]
 
 }
@@ -42,6 +43,11 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
         return try displayIDs.compactMap { displayID in
             return try UUID.getUUIDFromDisplayID(displayID: displayID)
         }
+    }
+    
+    func isPresetAvailable(preset: DisplayPreset)throws -> Bool{
+        let displayUUIDs = try getCurrentDisplayUUIDs()
+        return preset.isAvaiable(currentDisplayUUIDs: displayUUIDs)
     }
 
     private func getMatchedMode(settings: DisplaySettings) throws -> CGDisplayMode {
