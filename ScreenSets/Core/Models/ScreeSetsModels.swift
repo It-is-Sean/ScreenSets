@@ -17,21 +17,29 @@ struct DisplayModePreference: Codable {
 
 }
 
+enum MirroringStatus: String, Encodable, Decodable {
+    case independent
+    case mirrored
+    case mirroring
+}
+
 final class DisplaySettings: Decodable, Encodable {
     let displayUUID: UUID
     let originX: Int32
     let originY: Int32
     let mode: DisplayModePreference
+    let mirroringStatus: MirroringStatus
     let mirroringMaster: UUID?
     init(
         displayUUID: UUID, originX: Int32, originY: Int32, mode: DisplayModePreference,
-        mirroringMaster: UUID?
+        mirroringStatus: MirroringStatus, mirroringMaster: UUID?
     ) {
         self.displayUUID = displayUUID
         self.originX = originX
         self.originY = originY
         self.mode = mode
         self.mirroringMaster = mirroringMaster
+        self.mirroringStatus = mirroringStatus
     }
     func matches(_ other: DisplaySettings) -> Bool {
         displayUUID == other.displayUUID && originX == other.originX && originY == other.originY
@@ -83,23 +91,10 @@ final class DisplayPreset: Decodable, Encodable {
             return expected.matches(actual)
         }
     }
-    // let mirrorMasterUUIDs = Set(
-    //     settings.compactMap(\.mirroringMaster)
-    // )
-    //
-    // 然后分类：
-    //
-    // mirroringMaster != nil
-    //     → 镜像从屏
-    //
-    // mirroringMaster == nil 且 UUID 被其他显示器引用
-    //     → 镜像主屏
-    //
-    // mirroringMaster == nil 且没有被引用
-    //     → 独立显示器
+
     func getMirroringDisplaySettings() -> [DisplaySettings] {
         return displayPreferences.filter {
-            $0.mirroringMaster != nil
+            $0.mirroringStatus == .mirroring
         }
 
     }
@@ -108,10 +103,15 @@ final class DisplayPreset: Decodable, Encodable {
         return Array(Set(displayPreferences.compactMap(\.mirroringMaster)))
     }
 
-    func getMirroredDisplayPreferences() -> [DisplaySettings] {
-        let masterUUIDs = getMirroredDisplayIndexs()
+    func getMirroredDisplaySettings() -> [DisplaySettings] {
         return displayPreferences.filter {
-            masterUUIDs.contains($0.displayUUID)
+            $0.mirroringStatus == .mirrored
+        }
+    }
+
+    func getIndependentDisplayPreference() -> [DisplaySettings] {
+        return displayPreferences.filter {
+            $0.mirroringStatus == .independent
         }
     }
 

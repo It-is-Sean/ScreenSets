@@ -12,6 +12,7 @@ protocol ScreenSetsServiceProtocol {
 
     func applyPreset(id: UUID) throws
     func updatePreset(id: UUID) throws
+    func deletePreset(id: UUID) throws
     func newPreset(name: String) throws
 
 }
@@ -92,4 +93,20 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         try refreshEnabledDisplayPresetUUID()
     }
 
+    func deletePreset(id: UUID) throws {
+        guard
+            let index = displayPresets.firstIndex(where: {
+                $0.id == id
+            })
+        else {
+            throw ScreenSetsServiceError.PresetNotFound
+        }
+
+        displayPresets.remove(at: index)
+        try displayPresetStorage.saveDisplayPresets(displayPresets)
+        try refreshEnabledDisplayPresetUUID()
+    }
+
+    // WARN: DO NOT forget to 'try refreshEnabledDisplayPresetUUID()' when adding new functions
+    //       (but i guess there is no need to add more functions anyway :) )
 }
