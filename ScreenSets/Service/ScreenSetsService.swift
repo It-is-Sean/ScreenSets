@@ -6,11 +6,11 @@
 //
 import Foundation
 import OSLog
+import SwiftUI
 
 protocol ScreenSetsServiceProtocol {
     var displayPresets: [DisplayPreset] { get }
-    var enabledDisplayPresetUUID: UUID? { get }
-    
+    var displayState: ScreenSetsService.DisplayState { get }
     func applyPreset(id: UUID) throws
     func isPresetAvailable(id: UUID) -> Bool
     func updatePreset(id: UUID) throws
@@ -26,11 +26,16 @@ enum ScreenSetsServiceError: Error {
 
 @Observable
 final class ScreenSetsService: ScreenSetsServiceProtocol {
+    struct DisplayState: Equatable {
+        var enabledPresetUUID: UUID?
+        var availablePresetUUIDs: [UUID]
+    }
     let coreGraphicsService: any CoreGraphicsServiceProtocol
     let displayPresetStorage: any DisplayPresetsStorageProtocol
 
     var displayPresets: [DisplayPreset]
-    var enabledDisplayPresetUUID: UUID? = nil
+
+    var displayState: DisplayState = DisplayState(enabledPresetUUID: nil, availablePresetUUIDs: [])
 
     init(
         coreGraphicsService: any CoreGraphicsServiceProtocol,
@@ -43,9 +48,9 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         } catch {
             self.displayPresets = displayPresetStorage.initDisplayPresets()
         }
-        try? refreshEnabledDisplayPresetUUID()
+        try? refreshDisplayState()
     }
-    
+
     private func getPreset(id: UUID) throws -> DisplayPreset {
         guard
             let preset = displayPresets.first(where: {
@@ -56,7 +61,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         }
         return preset
     }
-    
+
     private func getPresetIndex(id: UUID) throws -> Int {
         guard
             let presetIndex = displayPresets.firstIndex(where: {
@@ -68,33 +73,47 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         return presetIndex
     }
 
-    func refreshEnabledDisplayPresetUUID() throws {
-        let currentDisplaysPreference: [DisplaySettings] =
+    func refreshDisplayState() throws {
+        let currentSettings =
             try coreGraphicsService.getCurrentDisplaysPreference()
 
-        enabledDisplayPresetUUID =
-            displayPresets.first {
-                $0.matches(currentDisplaysPreference)
-            }?.id
+        let currentDisplayUUIDs =
+            currentSettings.map(\.displayUUID)
+
+        let enabledPresetUUID = displayPresets.first {
+            $0.matches(currentSettings)
+        }?.id
+
+        let availablePresetUUIDs = Array(
+            Set(
+                displayPresets
+                    .filter {
+                        $0.isAvaiable(currentDisplayUUIDs: currentDisplayUUIDs)
+                    }
+                    .map(\.id)
+            ))
+
+        displayState = DisplayState(
+            enabledPresetUUID: enabledPresetUUID, availablePresetUUIDs: availablePresetUUIDs)
     }
 
-    func isPresetAvailable(id: UUID) -> Bool{
+    func isPresetAvailable(id: UUID) -> Bool {
         var isAvailable = false
-        do{
+        do {
             let preset = try getPreset(id: id)
             isAvailable = try coreGraphicsService.isPresetAvailable(preset: preset)
-        } catch{
+        } catch {
             Logger.service.error(
                 "Failed to check preset availability: \(error.localizedDescription, privacy: .public)"
             )
         }
         return isAvailable
     }
-    
+
     func applyPreset(id: UUID) throws {
         let preset = try getPreset(id: id)
         try coreGraphicsService.applyPreset(preset: preset)
-        try refreshEnabledDisplayPresetUUID()
+        //try refreshDisplayState()
     }
 
     func updatePreset(id: UUID) throws {
@@ -106,7 +125,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
             id: displayPresets[presetIndex].id)
         displayPresets[presetIndex] = newDisplayPreset
         try displayPresetStorage.saveDisplayPresets(displayPresets)
-        try refreshEnabledDisplayPresetUUID()
+        //try refreshDisplayState()
     }
 
     func newPreset(name: String) throws {
@@ -115,7 +134,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
             displayPreferences: currentDisplaysPreference, name: name)
         displayPresets.append(newDisplayPreset)
         try displayPresetStorage.saveDisplayPresets(displayPresets)
-        try refreshEnabledDisplayPresetUUID()
+        try refreshDisplayState()
     }
 
     func deletePreset(id: UUID) throws {
@@ -123,9 +142,8 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
 
         displayPresets.remove(at: index)
         try displayPresetStorage.saveDisplayPresets(displayPresets)
-        try refreshEnabledDisplayPresetUUID()
+        try refreshDisplayState()
     }
-
 
     // WARN: DO NOT forget to 'try refreshEnabledDisplayPresetUUID()' when adding new functions
     //       (but i guess there is no need to add more functions anyway :) )

@@ -23,7 +23,6 @@ struct DeleteButton: View {
                 Text("Delete")
                     .font(.headline)
             }
-            .foregroundStyle(.white)
         }
         .controlSize(.large)
         .tint(.red)
@@ -59,7 +58,6 @@ struct UpdateButton: View{
                  Text("Update")
                      .font(.headline)
              }
-             .foregroundStyle(.white)
 
              .alert("Delete the preset \(presetName)?", isPresented: $showAlert) {
                      Button("NO", role: .cancel) {}

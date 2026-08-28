@@ -14,7 +14,7 @@ import SwiftUI
 struct ScreenSetsApp: App {
     @State private var screenSetsService: ScreenSetsService
     @State private var appPreferences: AppPreferences
-    init(){
+    init() {
         let di = AppDI.live()
         _screenSetsService = State(
             initialValue: di.screenSetsService
@@ -31,13 +31,14 @@ struct ScreenSetsApp: App {
                 .environment(appPreferences)
                 .frame(minWidth: 720, minHeight: 520)
                 .containerBackground(.thickMaterial, for: .window)
+                // Listen to the Notification of system display status changed
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: NSApplication.didChangeScreenParametersNotification
                     )
                 ) { _ in
                     do {
-                        try screenSetsService.refreshEnabledDisplayPresetUUID()
+                        try screenSetsService.refreshDisplayState()
                     } catch {
                         Logger.service.error(
                             "Failed to refresh display preset: \(error.localizedDescription, privacy: .public)"

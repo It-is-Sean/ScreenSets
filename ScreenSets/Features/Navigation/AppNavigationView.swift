@@ -16,8 +16,8 @@ struct AppNavigationView: View {
                 }.padding(.top, 15)
         } detail: {
             switch selectedSection {
-            case .presets, .none: PresetsView().padding(.horizontal).padding(.bottom)
-            case .settings: SettingsView().padding(.horizontal).padding(.bottom)
+            case .presets, .none: PresetsView()
+            case .settings: SettingsView().padding(.leading)
             }
         }
         .navigationTransition(.automatic)

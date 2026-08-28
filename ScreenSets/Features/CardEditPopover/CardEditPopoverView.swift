@@ -13,13 +13,13 @@ struct CardEditPopoverView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 7) {
             HStack {
-                // Image(systemName: "pencil")
-                //     .font(.system(size: 12, weight: .bold))
-                //     .foregroundStyle(.secondary).padding(.leading, 5).padding(.trailing, -3)
-                Text("EDIT:")
+                Spacer()
+                Image(systemName: "pencil")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.secondary).padding(.trailing, -3)
+                Text("EDIT")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.secondary)
-                    .padding(.leading, 6)
                 Spacer()
             }
 

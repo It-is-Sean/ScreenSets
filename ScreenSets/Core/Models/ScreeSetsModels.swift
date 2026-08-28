@@ -51,7 +51,7 @@ final class DisplaySettings: Decodable, Encodable {
     }
 }
 
-final class DisplayPreset: Decodable, Encodable ,Identifiable{
+final class DisplayPreset: Decodable, Encodable, Identifiable, Hashable {
     let id: UUID
     let name: String
     var displayUUIDs: [UUID]
@@ -67,6 +67,15 @@ final class DisplayPreset: Decodable, Encodable ,Identifiable{
         self.displayUUIDs = displayUUIDs
         self.name = name
     }
+    
+    static func == (lhs: DisplayPreset, rhs: DisplayPreset) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     func isAvaiable(currentDisplayUUIDs: [UUID]) -> Bool {
         if Set(currentDisplayUUIDs) == Set(self.displayUUIDs) {
             return true
