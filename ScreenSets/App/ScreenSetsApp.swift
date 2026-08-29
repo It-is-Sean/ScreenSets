@@ -133,9 +133,24 @@ struct ScreenSetsApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 480, height: 720)
         .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .appInfo) {
+                AboutButton()
+            }
+        }
+        
+        Window("About The App", id: "about") {
+            AboutView()
+                .containerBackground(.thickMaterial, for: .window)
+    
+        }
+        .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)
+        .windowBackgroundDragBehavior(.enabled)
         
         MenuBarExtra("ScreenSets", systemImage: "display.2",isInserted: $appPreferences.showInMenuBar) {
             MenuBarContent()
+                .environment(screenSetsService)
         }
     }
 }

@@ -9,17 +9,25 @@ import OSLog
 import SwiftUI
 
 protocol ScreenSetsServiceProtocol {
+    // Hook for SpotlightService
     var onPresetsChanged: (() -> Void)? {get}
+    
+    // Get DisplayPresets (all, available, unavilable)
     var displayPresets: [DisplayPreset] { get }
+    var availableDisplayPresets: [DisplayPreset] { get }
+    var unavailableDisplayPresets: [DisplayPreset] { get}
+    
     var displayState: ScreenSetsService.DisplayState { get }
     func getCurrentDisplayPreferences() throws -> [DisplaySettings]
 
+    // Preset Actions
     func applyPreset(id: UUID) throws
     func isPresetAvailable(id: UUID) -> Bool
     func updatePreset(id: UUID) throws
     func deletePreset(id: UUID) throws
     func newPreset(name: String) throws
     
+    // Name Related
     func getDefaultName() -> String
     func renamePreset(id: UUID, newName: String) throws
 
@@ -43,6 +51,21 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
     var displayPresets: [DisplayPreset]
 
     var displayState: DisplayState = DisplayState(enabledPresetUUID: nil, availablePresetUUIDs: [], onlineDisplayUUIDs: [])
+    
+    var availableDisplayPresets: [DisplayPreset] {
+        let availableIDs = Set(displayState.availablePresetUUIDs)
+
+        return displayPresets.filter { preset in
+            availableIDs.contains(preset.id)
+        }
+    }
+    var unavailableDisplayPresets: [DisplayPreset] {
+        let availableIDs = Set(displayState.availablePresetUUIDs)
+
+        return displayPresets.filter { preset in
+            !availableIDs.contains(preset.id)
+        }
+    }
     
     @ObservationIgnored
     var onPresetsChanged: (() -> Void)?
