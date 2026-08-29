@@ -9,7 +9,7 @@ import OSLog
 import SwiftUI
 
 protocol ScreenSetsServiceProtocol {
-    
+    var onPresetsChanged: (() -> Void)? {get}
     var displayPresets: [DisplayPreset] { get }
     var displayState: ScreenSetsService.DisplayState { get }
     func getCurrentDisplayPreferences() throws -> [DisplaySettings]
@@ -43,6 +43,9 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
     var displayPresets: [DisplayPreset]
 
     var displayState: DisplayState = DisplayState(enabledPresetUUID: nil, availablePresetUUIDs: [], onlineDisplayUUIDs: [])
+    
+    @ObservationIgnored
+    var onPresetsChanged: (() -> Void)?
 
     init(
         coreGraphicsService: any CoreGraphicsServiceProtocol,
@@ -131,9 +134,11 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         
         preset.displayPreferences = currentDisplaysPreference
         preset.displayUUIDs = currentDisplaysPreference.map(\.displayUUID)
-
+        
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
+        onPresetsChanged?()
+        
     }
 
     func newPreset(name: String) throws {
@@ -141,8 +146,11 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         let newDisplayPreset = DisplayPreset(
             displayPreferences: currentDisplaysPreference, name: name)
         displayPresets.append(newDisplayPreset)
+        
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
+        onPresetsChanged?()
+
     }
     
     func getCurrentDisplayPreferences() -> [DisplaySettings]{
@@ -157,24 +165,59 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         displayPresets.remove(at: index)
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
+        onPresetsChanged?()
     }
     
     func getValidName(id: UUID, name: String) -> String {
-        let baseName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        func nameIsUsed(
+            _ name: String,
+            excluding presetID: UUID
+        ) -> Bool {
+            displayPresets.contains {
+                $0.id != presetID
+                    && $0.name.caseInsensitiveCompare(name) == .orderedSame
+            }
+        }
 
-        var candidate = baseName
+        func nameByRemovingNumericSuffixes(_ name: String) -> String {
+            var baseName = name
+            let suffixPattern = #"\s*\([0-9]+\)\s*$"#
+
+            while let suffixRange = baseName.range(
+                of: suffixPattern,
+                options: .regularExpression
+            ) {
+                baseName.removeSubrange(suffixRange)
+            }
+
+            let normalizedName = baseName.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+            return normalizedName.isEmpty ? name : normalizedName
+        }
+        
+        let requestedName = name.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard nameIsUsed(requestedName, excluding: id) else {
+            return requestedName
+        }
+
+        let baseName = nameByRemovingNumericSuffixes(requestedName)
+        var candidate: String
         var index = 1
 
-        while displayPresets.contains(where: {
-            $0.id != id &&
-            $0.name.caseInsensitiveCompare(candidate) == .orderedSame
-        }) {
+        repeat {
             candidate = "\(baseName) (\(index))"
             index += 1
-        }
+        } while nameIsUsed(candidate, excluding: id)
 
         return candidate
     }
+
+
     func getDefaultName() -> String {
         var index = 1
         let baseName = "New Preset"
@@ -205,6 +248,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
 
         preset.name = name
         try displayPresetStorage.saveDisplayPresets(displayPresets)
+        onPresetsChanged?()
     }
     // WARN: DO NOT forget to 'try refreshEnabledDisplayPresetUUID()' when adding new functions
     //       (but i guess there is no need to add more functions anyway :) )

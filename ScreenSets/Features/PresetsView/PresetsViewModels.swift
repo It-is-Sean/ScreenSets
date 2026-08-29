@@ -223,22 +223,22 @@ struct PresetCard: View {
         let isActive = screenSetsService.displayState.enabledPresetUUID == displayPreset.id
 
         HStack {
-            HStack {
                 VStack {
                     PresetPreviewCanvas(
                         displayPreferences: displayPreset.displayPreferences,
                         cornerRadius: 5
                     )
-                    .frame(width: 100)
+                    .frame(width: 120)
                     .padding(12)
+                    
                     .background {
                         RoundedRectangle(
-                            cornerRadius: 16,
+                            cornerRadius: 14,
                             style: .continuous
                         )
                         .fill(.quaternary)
                     }
-                }.padding(.leading, 3)
+                }.padding(13)
                 Spacer()
                 VStack(alignment: .trailing) {
                     CardTitle(text: displayPreset.name)
@@ -256,8 +256,7 @@ struct PresetCard: View {
                         }
                     }
 
-                }
-            }.padding(15)
+                }.padding(15)
 
 
         }

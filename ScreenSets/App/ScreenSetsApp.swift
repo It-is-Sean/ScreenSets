@@ -9,11 +9,14 @@ import AppKit
 import Combine
 import OSLog
 import SwiftUI
+import AppIntents
 
 @main
 struct ScreenSetsApp: App {
     @State private var screenSetsService: ScreenSetsService
     @State private var appPreferences: AppPreferences
+    private let spotlightSevice: SpotlightService
+    
     private struct AlwaysActiveVisualEffectView: NSViewRepresentable {
         var material: NSVisualEffectView.Material = .underWindowBackground
 
@@ -39,6 +42,7 @@ struct ScreenSetsApp: App {
 
     init() {
         let di = AppDI.live()
+        spotlightSevice = di.spotlightService
         _screenSetsService = State(
             initialValue: di.screenSetsService
         )
@@ -46,6 +50,13 @@ struct ScreenSetsApp: App {
         _appPreferences = State(
             initialValue: di.appPreferences
         )
+        
+        let dependency: any SpotlightServiceProtocol = di.spotlightService
+        AppDependencyManager.shared.add(
+            key: SpotlightDependencyKey.value,
+            dependency: dependency
+        )
+        ScreenSetsShortcuts.updateAppShortcutParameters()
     }
     var body: some Scene {
         WindowGroup {
@@ -57,17 +68,23 @@ struct ScreenSetsApp: App {
                     AlwaysActiveVisualEffectView()
                         .allowsHitTesting(false)
                 }                // Listen to the Notification of system display status changed
+                .task {
+                    await spotlightSevice.syncEntities()
+                }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: NSApplication.didChangeScreenParametersNotification
                     )
                 ) { _ in
-                    do {
-                        try screenSetsService.refreshDisplayState()
-                    } catch {
-                        Logger.service.error(
-                            "Failed to refresh display preset: \(error.localizedDescription, privacy: .public)"
-                        )
+                    Task { @MainActor in
+                        do {
+                            try screenSetsService.refreshDisplayState()
+                            await spotlightSevice.syncEntities()
+                        } catch {
+                            Logger.service.error(
+                                "Failed to refresh display preset: \(error.localizedDescription, privacy: .public)"
+                            )
+                        }
                     }
                 }
 
