@@ -48,4 +48,4 @@ If that happens:
 
 You only need to do this once.
 
-> A project built with care, not ai-generated and shipped. If you find it useful, a GitHub star would mean a lot ⭐️
+> A project built with care. If you find it useful, a GitHub star would mean a lot ⭐️
