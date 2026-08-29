@@ -9,37 +9,35 @@ import SwiftUI
 
 struct AppNavigationView: View {
     @State private var selectedSection: SidebarSections? = .presets
-    
-    
+
     var body: some View {
-        NavigationSplitView{
-            List(SidebarSections.allCases, selection: $selectedSection) { section in
-                Label(section.rawValue, systemImage: section.iconName).tag(section)
-            }.padding(.top, 15)
-        } detail: {
-            switch selectedSection {
-            case .presets, .none: PresetsView()
-            case .settings: SettingsView().padding(.leading)
+        // NavigationSplitView{
+        //     List(SidebarSections.allCases, selection: $selectedSection) { section in
+        //         Label(section.rawValue, systemImage: section.iconName).tag(section)
+        //     }.padding(.top, 15)
+        // } detail: {
+        //     switch selectedSection {
+        //     case .presets, .none: PresetsView()
+        //     case .settings: SettingsView().padding(.leading)
+        //     }
+
+        TabView(selection: $selectedSection) {
+            ForEach(SidebarSections.allCases) { section in
+                Tab(
+                    section.rawValue,
+                    systemImage: section.iconName,
+                    value: Optional(section)
+                ) {
+                    switch section {
+                    case .presets:
+                        PresetsView()
+
+                    case .settings:
+                        SettingsView()
+                            .padding(.horizontal)
+                    }
+                }
             }
-            
-            // TabView(selection: $selectedSection) {
-            //     ForEach(SidebarSections.allCases) { section in
-            //         Tab(
-            //             section.rawValue,
-            //             systemImage: section.iconName,
-            //             value: Optional(section)
-            //         ) {
-            //             switch section {
-            //             case .presets:
-            //                 PresetsView()
-            //
-            //             case .settings:
-            //                 SettingsView()
-            //                     .padding(.horizontal)
-            //             }
-            //         }
-            //     }
-            // }
         }
     }
 }

@@ -233,7 +233,7 @@ struct PresetCard: View {
                     
                     .background {
                         RoundedRectangle(
-                            cornerRadius: 14,
+                            cornerRadius: 12,
                             style: .continuous
                         )
                         .fill(.quaternary)

@@ -15,6 +15,8 @@ import AppIntents
 struct ScreenSetsApp: App {
     @State private var screenSetsService: ScreenSetsService
     @State private var appPreferences: AppPreferences
+    @NSApplicationDelegateAdaptor(AppDelegate.self)
+    private var appDelegate
     private let spotlightSevice: SpotlightService
     
     private struct AlwaysActiveVisualEffectView: NSViewRepresentable {
@@ -39,6 +41,27 @@ struct ScreenSetsApp: App {
             view.state = .active
         }
     }
+    
+    @MainActor
+    private final class AppDelegate: NSObject,
+        NSApplicationDelegate,
+        ObservableObject
+    {
+        @Published private(set) var mainWindowLaunchBehavior:
+            SceneLaunchBehavior = .suppressed
+
+        func applicationDidFinishLaunching(_ notification: Notification) {
+            DispatchQueue.main.async { [weak self] in
+                self?.mainWindowLaunchBehavior = .presented
+            }
+        }
+        
+        func applicationShouldTerminateAfterLastWindowClosed(
+            _ sender: NSApplication
+        ) -> Bool {
+            false
+        }
+    }
 
     init() {
         let di = AppDI.live()
@@ -59,11 +82,11 @@ struct ScreenSetsApp: App {
         ScreenSetsShortcuts.updateAppShortcutParameters()
     }
     var body: some Scene {
-        WindowGroup {
+        Window("ScreenSets", id: "main") {
             RootView()
                 .environment(screenSetsService)
                 .environment(appPreferences)
-                .frame(minWidth: 640, idealWidth: 640, maxWidth: 640 ,minHeight: 640, idealHeight: 720, maxHeight: .infinity)
+                .frame(minWidth: 580, idealWidth: 580, maxWidth: 580 ,minHeight: 640, idealHeight: 720, maxHeight: .infinity)
                 .containerBackground(for: .window) {
                     AlwaysActiveVisualEffectView()
                         .allowsHitTesting(false)
@@ -87,11 +110,34 @@ struct ScreenSetsApp: App {
                         }
                     }
                 }
+                .onAppear {
+                    NSApp.setActivationPolicy(.regular)
+                    DispatchQueue.main.async {
+                        NSApp.activate()
+                    }
+                }
+                .onDisappear {
+                    NSApp.setActivationPolicy(
+                        appPreferences.showInMenuBar
+                            ? .accessory
+                            : .regular
+                    )
+                }
 
         }
+        .defaultLaunchBehavior(
+            appPreferences.showInMenuBar
+                ? appDelegate.mainWindowLaunchBehavior
+                : .presented
+        )
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 480, height: 720)
         .windowResizability(.contentSize)
-
+        
+        MenuBarExtra("ScreenSets", systemImage: "display.2",isInserted: $appPreferences.showInMenuBar) {
+            MenuBarContent()
+        }
     }
 }
+
+

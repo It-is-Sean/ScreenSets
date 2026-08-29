@@ -41,7 +41,7 @@ struct SettingsView: View {
                     }.frame(maxWidth: .infinity)
                         .padding(3)
                 }.padding(7)
-            }
+            }.padding(.top)
 
             Spacer()
 

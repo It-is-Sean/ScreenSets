@@ -46,7 +46,7 @@ struct PresetEntity: IndexedEntity {
          return attributes
      }
  }
-protocol SpotlightServiceProtocol{
+protocol SpotlightServiceProtocol: Sendable{
     func syncEntities() async
     func suggestedEntities() -> [PresetEntity]
     func entities(for ids: [UUID]) -> [PresetEntity]
@@ -89,7 +89,6 @@ final class SpotlightService : SpotlightServiceProtocol{
                 try await searchableIndex.indexAppEntities(entities)
             }
 
-                 ScreenSetsShortcuts.updateAppShortcutParameters()
             } catch {
                 Logger.service.error(
                      """
@@ -97,6 +96,7 @@ final class SpotlightService : SpotlightServiceProtocol{
                      \(error.localizedDescription, privacy: .public)
                      """)
         }
+        ScreenSetsShortcuts.updateAppShortcutParameters()
     }
     
     func suggestedEntities() -> [PresetEntity] {
@@ -189,6 +189,24 @@ struct PresetEntityQuery: EntityStringQuery {
                     string
                 )
             }
+    }
+}
+
+struct OpenPresetIntent: OpenIntent {
+    static let title: LocalizedStringResource =
+        "Open ScreenSet Preset"
+
+    @Parameter(title: "Preset")
+    var target: PresetEntity
+
+    @Dependency(key: SpotlightDependencyKey.value)
+    private var spotlightService:
+        any SpotlightServiceProtocol
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        try spotlightService.applyPreset(id: target.id)
+        return .result()
     }
 }
 
