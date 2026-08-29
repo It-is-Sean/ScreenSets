@@ -4,6 +4,7 @@
 //
 //  Created by Sean on 2026/8/23.
 //
+import AppKit
 import Foundation
 import OSLog
 import SwiftUI
@@ -48,6 +49,9 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
     let coreGraphicsService: any CoreGraphicsServiceProtocol
     let displayPresetStorage: any DisplayPresetsStorageProtocol
 
+    @ObservationIgnored
+    private var displayChangesTask: Task<Void, Never>?
+
     var displayPresets: [DisplayPreset]
 
     var displayState: DisplayState = DisplayState(enabledPresetUUID: nil, availablePresetUUIDs: [], onlineDisplayUUIDs: [])
@@ -82,6 +86,31 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
             self.displayPresets = displayPresetStorage.initDisplayPresets()
         }
         try? refreshDisplayState()
+        startMonitoringDisplayChanges()
+    }
+
+    deinit {
+        displayChangesTask?.cancel()
+    }
+
+    private func startMonitoringDisplayChanges() {
+        displayChangesTask = Task { @MainActor [weak self] in
+            for await _ in NotificationCenter.default.notifications(
+                named: NSApplication.didChangeScreenParametersNotification
+            ) {
+                guard let self else {
+                    return
+                }
+
+                do {
+                    try refreshDisplayState()
+                } catch {
+                    Logger.service.error(
+                        "Failed to refresh display state: \(error.localizedDescription, privacy: .public)"
+                    )
+                }
+            }
+        }
     }
 
     private func getPreset(id: UUID) throws -> DisplayPreset {
@@ -146,7 +175,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
     func applyPreset(id: UUID) throws {
         let preset = try getPreset(id: id)
         try coreGraphicsService.applyPreset(preset: preset)
-        //try refreshDisplayState()
+        try refreshDisplayState()
     }
 
     

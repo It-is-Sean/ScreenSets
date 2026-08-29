@@ -7,7 +7,6 @@
 
 import AppKit
 import Combine
-import OSLog
 import SwiftUI
 // import AppIntents
 
@@ -90,26 +89,10 @@ struct ScreenSetsApp: App {
                 .containerBackground(for: .window) {
                     AlwaysActiveVisualEffectView()
                         .allowsHitTesting(false)
-                }                // Listen to the Notification of system display status changed
+                }
 //                .task {
 //                    await spotlightService.syncEntities()
 //                }
-                .onReceive(
-                    NotificationCenter.default.publisher(
-                        for: NSApplication.didChangeScreenParametersNotification
-                    )
-                ) { _ in
-                    Task { @MainActor in
-                        do {
-                            try screenSetsService.refreshDisplayState()
-                            // await spotlightService.syncEntities()
-                        } catch {
-                            Logger.service.error(
-                                "Failed to refresh display preset: \(error.localizedDescription, privacy: .public)"
-                            )
-                        }
-                    }
-                }
                 .onAppear {
                     NSApp.setActivationPolicy(.regular)
                     DispatchQueue.main.async {
@@ -154,4 +137,3 @@ struct ScreenSetsApp: App {
         }
     }
 }
-

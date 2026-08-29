@@ -46,8 +46,6 @@ struct MenuBarContent: View {
                 }
             }
             Divider()
-            AboutButton()
-            
             Button {
                 openWindow(id: "main")
             } label: {
