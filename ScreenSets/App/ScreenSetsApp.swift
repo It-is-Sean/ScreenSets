@@ -14,6 +14,29 @@ import SwiftUI
 struct ScreenSetsApp: App {
     @State private var screenSetsService: ScreenSetsService
     @State private var appPreferences: AppPreferences
+    private struct AlwaysActiveVisualEffectView: NSViewRepresentable {
+        var material: NSVisualEffectView.Material = .underWindowBackground
+
+        func makeNSView(context: Context) -> NSVisualEffectView {
+            let view = NSVisualEffectView()
+            configure(view)
+            return view
+        }
+
+        func updateNSView(
+            _ nsView: NSVisualEffectView,
+            context: Context
+        ) {
+            configure(nsView)
+        }
+
+        private func configure(_ view: NSVisualEffectView) {
+            view.material = material
+            view.blendingMode = .behindWindow
+            view.state = .active
+        }
+    }
+
     init() {
         let di = AppDI.live()
         _screenSetsService = State(
@@ -29,9 +52,11 @@ struct ScreenSetsApp: App {
             RootView()
                 .environment(screenSetsService)
                 .environment(appPreferences)
-                .frame(minWidth: 720, minHeight: 520)
-                .containerBackground(.thickMaterial, for: .window)
-                // Listen to the Notification of system display status changed
+                .frame(minWidth: 640, idealWidth: 640, maxWidth: 640 ,minHeight: 640, idealHeight: 720, maxHeight: .infinity)
+                .containerBackground(for: .window) {
+                    AlwaysActiveVisualEffectView()
+                        .allowsHitTesting(false)
+                }                // Listen to the Notification of system display status changed
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: NSApplication.didChangeScreenParametersNotification
@@ -48,6 +73,8 @@ struct ScreenSetsApp: App {
 
         }
         .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 480, height: 720)
+        .windowResizability(.contentSize)
 
     }
 }

@@ -14,9 +14,13 @@ struct PresetsView: View {
     private var screenSetsService
     
     @State var showOpenSettingAlert = false
+    @State var showNewPopoverSheet = false
 
+    // private let columns = [
+    //     GridItem(.adaptive(minimum: 180, maximum: 320), spacing: 8, alignment: .top)
+    // ]
     private let columns = [
-        GridItem(.adaptive(minimum: 180, maximum: 320), spacing: 8, alignment: .top)
+        GridItem(.flexible(), spacing: 8, alignment: .top)
     ]
     var body: some View {
         VStack(alignment: .leading) {
@@ -65,9 +69,8 @@ struct PresetsView: View {
 
             Button {
                 if isNewPresetAvailable {
-                    try? screenSetsService.newPreset(
-                        name: UUID().uuidString
-                    )
+                    showNewPopoverSheet = true
+                
                 } else {
                     showOpenSettingAlert = true
                 }
@@ -78,6 +81,9 @@ struct PresetsView: View {
             .controlSize(.extraLarge)
             .buttonStyle(.glassProminent)
             .buttonBorderShape(.circle)
+            .popover(isPresented: $showNewPopoverSheet){
+                NewPresetPopoverView()
+            }
             .alert("Open Settings to add a preset?", isPresented: $showOpenSettingAlert) {
                     Button("NO", role: .cancel) {}
                     Button("Yes"){

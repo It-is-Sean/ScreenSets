@@ -73,6 +73,19 @@ struct ApplyButton: View {
         }
     }
     
+    private var buttonTint: Color?{
+        switch animationState {
+        case .apply:
+                nil
+        case .applied:
+                .blue
+        case .active:
+                .blue
+        case .unavailable:
+                nil
+        }
+            
+    }
 
     init(presetName: String, isActive: Bool, isAvailable: Bool, action: @escaping () throws -> Void)
     {
@@ -128,6 +141,7 @@ struct ApplyButton: View {
 
         }.controlSize(.large)
             .buttonStyle(.glass)
+            .tint(buttonTint)
             .buttonBorderShape(buttonBorderShape)
             .disabled(state == .unavailable)
             .animation(
@@ -182,7 +196,7 @@ struct EditButton<Content: View>: View {
         .help("Edit")
         .popover(
             isPresented: $isPresented, attachmentAnchor: .rect(.bounds),
-            arrowEdge: .top
+            arrowEdge: .bottom
         ) {
             content()
         }
@@ -207,10 +221,18 @@ struct PresetCard: View {
         HStack {
             HStack {
                 VStack {
-                    Image(systemName: "display.2").font(.system(size: 20, weight: .semibold))
-                        .padding(.bottom, 1)
-                    Text("\(monitorCount)")
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                    PresetPreviewCanvas(
+                        displayPreferences: displayPreset.displayPreferences
+                    )
+                    .frame(width: 100)
+                    .padding(12)
+                    .background {
+                        RoundedRectangle(
+                            cornerRadius: 16,
+                            style: .continuous
+                        )
+                        .fill(.quaternary)
+                    }
                 }.padding(.leading, 3)
                 Spacer()
                 VStack(alignment: .trailing) {

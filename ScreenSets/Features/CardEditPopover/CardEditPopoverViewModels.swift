@@ -20,13 +20,12 @@ struct DeleteButton: View {
         } label: {
             HStack {
                 Image(systemName: "trash")
-                Text("Delete")
-                    .font(.headline)
             }
         }
-        .controlSize(.large)
+        .controlSize(.extraLarge)
         .tint(.red)
         .buttonStyle(.glassProminent)
+        .buttonBorderShape(.circle)
         .alert("Delete the preset \(presetName)?", isPresented: $showAlert) {
             Button("Cancel", role: .cancel) {}
 
@@ -43,6 +42,33 @@ struct DeleteButton: View {
 
     }
 }
+
+struct SaveButton: View {
+    @State private var showAlert = false
+
+    let action: () throws -> Void
+
+    var body: some View {
+        Button {
+            do {
+                try action()
+            } catch{
+                Logger.service.error("Failed to save name")
+            }
+            
+        } label: {
+            HStack {
+                Image(systemName: "checkmark")
+                
+            }
+        }
+        .controlSize(.extraLarge)
+        .buttonStyle(.glassProminent)
+        .buttonBorderShape(.circle)
+
+    }
+}
+
 
 struct UpdateButton: View{
     @State private var showAlert = false
@@ -72,7 +98,7 @@ struct UpdateButton: View{
                     }
              }
          }
-         .controlSize(.large)
+        .controlSize(.extraLarge)
          .buttonStyle(.glass)
     }
 }

@@ -13,20 +13,36 @@ struct SettingsView: View {
     
     var body: some View {
         @Bindable var appPreferences = appPreferences
+
         VStack(alignment: .leading){
             PageTitle(text: "Settings")
-            Form {
-                Toggle(
-                    "Show in Menu Bar",
-                    isOn: $appPreferences.showInMenuBar
-                )
+            GroupBox {
+                VStack(alignment: .leading) {
+                    VStack(alignment: .leading) {
+                        Text("App settings").font(.body).bold().foregroundStyle(.secondary)
+                        Toggle(
+                            isOn: $appPreferences.showInMenuBar
+                        ) {
+                            Text("Show in menubar").frame(
+                                maxWidth: .infinity, alignment: .leading)
+                        }
+                        .toggleStyle(.switch)
+                        .frame(maxWidth: .infinity)
+                        Divider()
+                        Toggle(
+                            isOn: $appPreferences.launchAtLogIn
+                        ) {
+                            Text("Launch at login").frame(
+                                maxWidth: .infinity, alignment: .leading)
+                        }
+                        .toggleStyle(.switch)
+                        .frame(maxWidth: .infinity)
 
-                Toggle(
-                    "Launch at Login",
-                    isOn: $appPreferences.launchAtLogIn
-                )
+                    }.frame(maxWidth: .infinity)
+                        .padding(3)
+                }.padding(7)
             }
-            
+
             Spacer()
 
         }

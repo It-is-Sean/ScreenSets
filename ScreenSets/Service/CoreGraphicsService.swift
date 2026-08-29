@@ -7,7 +7,7 @@ import CoreGraphics
 //  Created by Sean on 2026/8/20.
 //
 import Foundation
-
+import AppKit
 protocol CoreGraphicsServiceProtocol {
     func applyPreset(preset: DisplayPreset) throws
     func isPresetAvailable(preset: DisplayPreset) throws -> Bool
@@ -215,8 +215,15 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
     }
 
     private func getDisplaySetting(displayID: CGDirectDisplayID) throws -> DisplaySettings {
-        // get UUID
+        // Get UUID
         let id: UUID = try UUID.getUUIDFromDisplayID(displayID: displayID)
+        
+        // Get display name
+        let displayName: String? = NSScreen.screens.first{screen in
+            guard let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+            else { return false }
+            return CGDirectDisplayID(number.uint32Value) == displayID
+        }?.localizedName
 
         // Get current display placements
         let bounds = CGDisplayBounds(displayID)
@@ -247,7 +254,7 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
         let displaySetting = DisplaySettings(
             displayUUID: id, originX: originX, originY: originY, mode: modePreference,
             mirroringStatus: mirroringStatus,
-            mirroringMaster: mirroringMaster)
+            mirroringMaster: mirroringMaster, displayName: displayName)
         return displaySetting
     }
 
@@ -265,6 +272,7 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
 
         for index in mirroringDisplayIndices {
             let mirroringDisplay = displaysPreference[index]
+            
             guard
                 let mirroredIndex = displaysPreference.firstIndex(where: {
                     $0.displayUUID == mirroringDisplay.mirroringMaster
@@ -277,8 +285,7 @@ final class CoreGraphicsService: CoreGraphicsServiceProtocol {
                 displayUUID: mirrroredDisplaySetting.displayUUID,
                 originX: mirrroredDisplaySetting.originX, originY: mirrroredDisplaySetting.originY,
                 mode: mirrroredDisplaySetting.mode, mirroringStatus: .mirrored,
-                mirroringMaster: mirrroredDisplaySetting.mirroringMaster)
-
+                mirroringMaster: mirrroredDisplaySetting.mirroringMaster, displayName: mirrroredDisplaySetting.displayName)
         }
 
         return displaysPreference

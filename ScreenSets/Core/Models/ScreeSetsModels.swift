@@ -23,8 +23,9 @@ enum MirroringStatus: String, Encodable, Decodable {
     case mirroring
 }
 
-final class DisplaySettings: Decodable, Encodable {
+final class DisplaySettings: Decodable, Encodable, Identifiable {
     let displayUUID: UUID
+    let displayName: String
     let originX: Int32
     let originY: Int32
     let mode: DisplayModePreference
@@ -32,7 +33,7 @@ final class DisplaySettings: Decodable, Encodable {
     let mirroringMaster: UUID?
     init(
         displayUUID: UUID, originX: Int32, originY: Int32, mode: DisplayModePreference,
-        mirroringStatus: MirroringStatus, mirroringMaster: UUID?
+        mirroringStatus: MirroringStatus, mirroringMaster: UUID?, displayName: String? = nil
     ) {
         self.displayUUID = displayUUID
         self.originX = originX
@@ -40,6 +41,7 @@ final class DisplaySettings: Decodable, Encodable {
         self.mode = mode
         self.mirroringMaster = mirroringMaster
         self.mirroringStatus = mirroringStatus
+        self.displayName = displayName ?? "Unknowm Display"
     }
     func matches(_ other: DisplaySettings) -> Bool {
         displayUUID == other.displayUUID && originX == other.originX && originY == other.originY
@@ -51,9 +53,10 @@ final class DisplaySettings: Decodable, Encodable {
     }
 }
 
+@Observable
 final class DisplayPreset: Decodable, Encodable, Identifiable, Hashable {
     let id: UUID
-    let name: String
+    var name: String
     var displayUUIDs: [UUID]
     var displayPreferences: [DisplaySettings]
 
