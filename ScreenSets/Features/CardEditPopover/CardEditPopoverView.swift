@@ -16,7 +16,7 @@ struct CardEditPopoverView: View {
     private var dismiss
 
     let preset: DisplayPreset
-
+    let isAvailable: Bool
     @State private var draftName = ""
     @FocusState private var isNameFocused: Bool
 
@@ -70,6 +70,7 @@ struct CardEditPopoverView: View {
                 TextField("Preset name", text: $draftName)
                     .textFieldStyle(.plain)
                     .lineLimit(1)
+                    .font(.system(size: 14,design: .rounded)).bold()
                     .focused($isNameFocused)
                     .onSubmit {
                         renamePreset()
@@ -113,6 +114,7 @@ struct CardEditPopoverView: View {
     private var buttons: some View {
         HStack(alignment: .center, spacing: 12) {
             DeleteButton(presetName: preset.name) {
+                dismiss()
                 try screenSetsService.deletePreset(
                     id: preset.id
                 )
@@ -124,6 +126,7 @@ struct CardEditPopoverView: View {
                     id: preset.id
                 )
             }
+            .disabled(!isAvailable)
             SaveButton {
                 renamePreset()
             }
@@ -146,12 +149,13 @@ struct CardEditPopoverView: View {
             return
         }
 
+        dismiss()
+
         do {
             try screenSetsService.renamePreset(
                 id: preset.id,
                 newName: trimmedName
             )
-            dismiss()
         } catch {
 
             Logger.service.error(

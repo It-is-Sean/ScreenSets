@@ -14,7 +14,11 @@ struct CardTitle: View {
         HStack {
             Text(text)
                 .font(.system(.title, design: .rounded, weight: .semibold))
-        }.padding(.leading, 5)
+                .id(text)
+                .transition(.opacity.combined(with: .blurReplace))
+        }
+        .animation(.smooth, value: text)
+        .padding(.leading, 5)
     }
 }
 
@@ -222,7 +226,8 @@ struct PresetCard: View {
             HStack {
                 VStack {
                     PresetPreviewCanvas(
-                        displayPreferences: displayPreset.displayPreferences
+                        displayPreferences: displayPreset.displayPreferences,
+                        cornerRadius: 5
                     )
                     .frame(width: 100)
                     .padding(12)
@@ -246,12 +251,14 @@ struct PresetCard: View {
                             try screenSetsService.applyPreset(id: displayPreset.id)
                         }
                         EditButton {
-                            CardEditPopoverView(preset: displayPreset)
+                            CardEditPopoverView(preset: displayPreset, isAvailable: isAvailable)
+                            
                         }
                     }
 
                 }
             }.padding(15)
+
 
         }
         .glassEffect(

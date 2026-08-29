@@ -13,7 +13,7 @@ struct PresetsView: View {
     @Environment(ScreenSetsService.self)
     private var screenSetsService
     
-    @State var showOpenSettingAlert = false
+    @State var showOpenSettingPopover = false
     @State var showNewPopoverSheet = false
 
     // private let columns = [
@@ -33,8 +33,13 @@ struct PresetsView: View {
                     LazyVGrid(columns: columns, alignment: .leading) {
                         ForEach(screenSetsService.displayPresets) { preset in
                             PresetCard(displayPreset: preset)
+                                .transition(
+                                    .move(edge: .trailing)
+                                    .combined(with: .blurReplace)
+                                )
                         }
                     }.padding(.bottom, 200).padding(.top)
+                        .animation(.smooth, value: screenSetsService.displayPresets)
                 }
                 .contentMargins(.leading, 16, for: .scrollContent)
 
@@ -72,7 +77,7 @@ struct PresetsView: View {
                     showNewPopoverSheet = true
                 
                 } else {
-                    showOpenSettingAlert = true
+                    showOpenSettingPopover = true
                 }
             } label: {
                 Image(systemName: "plus")
@@ -82,19 +87,11 @@ struct PresetsView: View {
             .buttonStyle(.glassProminent)
             .buttonBorderShape(.circle)
             .popover(isPresented: $showNewPopoverSheet){
+                
                 NewPresetPopoverView()
             }
-            .alert("Open Settings to add a preset?", isPresented: $showOpenSettingAlert) {
-                    Button("NO", role: .cancel) {}
-                    Button("Yes"){
-                            guard let url = URL(
-                                string: "x-apple.systempreferences:com.apple.Displays-Settings.extension"
-                            ) else {
-                                Logger.service.error("Failed to open Settings")
-                                return
-                            }
-                        openURL(url)
-                   }
+            .popover(isPresented: $showOpenSettingPopover){
+                OpenSettingsPopoverView()
             }
         }.padding(.bottom).padding(.trailing)
     }

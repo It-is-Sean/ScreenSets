@@ -72,8 +72,9 @@ struct NewPresetPopoverView: View {
                 .buttonBorderShape(.circle)
                 Spacer()
                 SaveButton {
-                    try screenSetsService.newPreset(name: trimmedName)
                     dismiss()
+                    try screenSetsService.newPreset(name: trimmedName)
+
                     
                 }
                 .disabled(!canRename)
@@ -95,6 +96,7 @@ struct NewPresetPopoverView: View {
             TextField("Preset name", text: $draftName)
                 .textFieldStyle(.plain)
                 .lineLimit(1)
+                .font(.system(size: 15,design: .rounded)).bold()
                 .focused($isNameFocused)
                 .onSubmit {
                     submitNewPreset(name: trimmedName)

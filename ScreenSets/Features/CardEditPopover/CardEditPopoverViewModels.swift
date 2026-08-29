@@ -26,7 +26,7 @@ struct DeleteButton: View {
         .tint(.red)
         .buttonStyle(.glassProminent)
         .buttonBorderShape(.circle)
-        .alert("Delete the preset \(presetName)?", isPresented: $showAlert) {
+        .alert("Delete \"\(presetName)\"?", isPresented: $showAlert) {
             Button("Cancel", role: .cancel) {}
 
             Button("Delete", role: .destructive) {
@@ -85,8 +85,8 @@ struct UpdateButton: View{
                      .font(.headline)
              }
 
-             .alert("Delete the preset \(presetName)?", isPresented: $showAlert) {
-                     Button("NO", role: .cancel) {}
+             .alert("Refresh the preset \"\(presetName)\"?", isPresented: $showAlert) {
+                     Button("No", role: .cancel) {}
                      Button("Yes"){
                          do {
                              try action()
