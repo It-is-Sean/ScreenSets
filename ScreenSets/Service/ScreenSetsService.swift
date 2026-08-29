@@ -9,8 +9,8 @@ import OSLog
 import SwiftUI
 
 protocol ScreenSetsServiceProtocol {
-    // Hook for SpotlightService
-    var onPresetsChanged: (() -> Void)? {get}
+//    // Hook for SpotlightService
+//    var onPresetsChanged: (() -> Void)? { get }
     
     // Get DisplayPresets (all, available, unavilable)
     var displayPresets: [DisplayPreset] { get }
@@ -67,8 +67,8 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         }
     }
     
-    @ObservationIgnored
-    var onPresetsChanged: (() -> Void)?
+//    @ObservationIgnored
+//    var onPresetsChanged: (() -> Void)?
 
     init(
         coreGraphicsService: any CoreGraphicsServiceProtocol,
@@ -160,7 +160,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
-        onPresetsChanged?()
+        // onPresetsChanged?()
         
     }
 
@@ -172,7 +172,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
-        onPresetsChanged?()
+        // onPresetsChanged?()
 
     }
     
@@ -188,7 +188,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
         displayPresets.remove(at: index)
         try displayPresetStorage.saveDisplayPresets(displayPresets)
         try refreshDisplayState()
-        onPresetsChanged?()
+        // onPresetsChanged?()
     }
     
     func getValidName(id: UUID, name: String) -> String {
@@ -271,7 +271,7 @@ final class ScreenSetsService: ScreenSetsServiceProtocol {
 
         preset.name = name
         try displayPresetStorage.saveDisplayPresets(displayPresets)
-        onPresetsChanged?()
+        // onPresetsChanged?()
     }
     // WARN: DO NOT forget to 'try refreshEnabledDisplayPresetUUID()' when adding new functions
     //       (but i guess there is no need to add more functions anyway :) )

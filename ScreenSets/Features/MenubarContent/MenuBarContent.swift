@@ -10,7 +10,7 @@ import AppKit
 import Combine
 import OSLog
 import SwiftUI
-import AppIntents
+// import AppIntents
 
 struct MenuBarContent: View {
     @Environment(\.openWindow) private var openWindow

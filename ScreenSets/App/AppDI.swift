@@ -10,7 +10,7 @@ import Foundation
 struct AppDI {
     let screenSetsService: ScreenSetsService
     let appPreferences: AppPreferences
-    let spotlightService: SpotlightService
+    // let spotlightService: SpotlightService
     static func live(
         defaults: UserDefaults = .standard
     ) -> AppDI {
@@ -28,20 +28,21 @@ struct AppDI {
         let appPreferences = AppPreferences(
             defaults: defaults
         )
-        let spotlightService = SpotlightService(screenSetsService: screenSetsService)
-        
-        screenSetsService.onPresetsChanged = {
-            [weak spotlightService] in
-            Task { @MainActor in
-                await spotlightService?.syncEntities()
-                
-            }
-        }
+//        let spotlightService = SpotlightService(
+//            screenSetsService: screenSetsService
+//        )
+//
+//        screenSetsService.onPresetsChanged = {
+//            [weak spotlightService] in
+//            Task { @MainActor in
+//                await spotlightService?.syncEntities()
+//            }
+//        }
 
         return AppDI(
             screenSetsService: screenSetsService,
-            appPreferences: appPreferences,
-            spotlightService: spotlightService
+            appPreferences: appPreferences
+//            spotlightService: spotlightService
         )
     }
 }
