@@ -13,6 +13,8 @@ struct SettingsView: View {
     
     var body: some View {
         @Bindable var appPreferences = appPreferences
+        let isLaunchAtLoginEnabled =
+            appPreferences.isLaunchAtLoginEnabled
 
         VStack(alignment: .leading){
             PageTitle(text: "Settings")
@@ -30,7 +32,15 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity)
                         Divider()
                         Toggle(
-                            isOn: $appPreferences.launchAtLogIn
+                            isOn: Binding(
+                                get: {
+                                    isLaunchAtLoginEnabled
+                                },
+                                set: {
+                                    appPreferences
+                                        .setLaunchAtLoginEnabled($0)
+                                }
+                            )
                         ) {
                             Text("Launch at login").frame(
                                 maxWidth: .infinity, alignment: .leading)
@@ -45,6 +55,9 @@ struct SettingsView: View {
 
             Spacer()
 
+        }
+        .onAppear {
+            appPreferences.refreshLaunchAtLoginStatus()
         }
     }
 }
