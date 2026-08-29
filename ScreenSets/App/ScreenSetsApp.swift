@@ -9,7 +9,7 @@ import AppKit
 import Combine
 import OSLog
 import SwiftUI
-import AppIntents
+// import AppIntents
 
 @main
 struct ScreenSetsApp: App {
@@ -17,7 +17,7 @@ struct ScreenSetsApp: App {
     @State private var appPreferences: AppPreferences
     @NSApplicationDelegateAdaptor(AppDelegate.self)
     private var appDelegate
-    private let spotlightSevice: SpotlightService
+    // private let spotlightService: SpotlightService
     
     private struct AlwaysActiveVisualEffectView: NSViewRepresentable {
         var material: NSVisualEffectView.Material = .underWindowBackground
@@ -65,7 +65,7 @@ struct ScreenSetsApp: App {
 
     init() {
         let di = AppDI.live()
-        spotlightSevice = di.spotlightService
+        // spotlightService = di.spotlightService
         _screenSetsService = State(
             initialValue: di.screenSetsService
         )
@@ -74,12 +74,12 @@ struct ScreenSetsApp: App {
             initialValue: di.appPreferences
         )
         
-        let dependency: any SpotlightServiceProtocol = di.spotlightService
-        AppDependencyManager.shared.add(
-            key: SpotlightDependencyKey.value,
-            dependency: dependency
-        )
-        ScreenSetsShortcuts.updateAppShortcutParameters()
+//        let dependency: any SpotlightServiceProtocol = di.spotlightService
+//        AppDependencyManager.shared.add(
+//            key: SpotlightDependencyKey.value,
+//            dependency: dependency
+//        )
+//        ScreenSetsShortcuts.updateAppShortcutParameters()
     }
     var body: some Scene {
         Window("ScreenSets", id: "main") {
@@ -91,9 +91,9 @@ struct ScreenSetsApp: App {
                     AlwaysActiveVisualEffectView()
                         .allowsHitTesting(false)
                 }                // Listen to the Notification of system display status changed
-                .task {
-                    await spotlightSevice.syncEntities()
-                }
+//                .task {
+//                    await spotlightService.syncEntities()
+//                }
                 .onReceive(
                     NotificationCenter.default.publisher(
                         for: NSApplication.didChangeScreenParametersNotification
@@ -102,7 +102,7 @@ struct ScreenSetsApp: App {
                     Task { @MainActor in
                         do {
                             try screenSetsService.refreshDisplayState()
-                            await spotlightSevice.syncEntities()
+                            // await spotlightService.syncEntities()
                         } catch {
                             Logger.service.error(
                                 "Failed to refresh display preset: \(error.localizedDescription, privacy: .public)"
@@ -154,5 +154,4 @@ struct ScreenSetsApp: App {
         }
     }
 }
-
 

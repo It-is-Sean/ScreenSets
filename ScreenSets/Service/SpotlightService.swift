@@ -4,6 +4,10 @@
 //
 //  Created by Sean on 2026/8/29.
 //
+/*
+ Temporarily disabled until release builds use a validated Developer ID
+ signature. Uncomment this block to restore Spotlight and App Intents.
+
 import Foundation
 import CoreSpotlight
 import AppIntents
@@ -265,3 +269,4 @@ struct ScreenSetsShortcuts: AppShortcutsProvider {
         .blue
     }
 }
+*/
