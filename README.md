@@ -11,7 +11,8 @@ Quickly switch display presets from your menu bar or the app dashboard.
 
 <img width="864" height="564" alt="image" src="https://github.com/user-attachments/assets/669a9905-fdd5-4b38-939c-71ca9a91f7bb" />
 
-> Actually I have implemented this feature, however, AppIntent on macOS needs developer certification to run which I can't afford :(
+> Actually I have implemented this feature, however, AppIntent on macOS needs developer certification to run which I can't afford
+> :(
 - menubar preset picker
 <img width="255" height="216" alt="image" src="https://github.com/user-attachments/assets/de04945d-468c-47bd-93af-be320f237d4f" />
 
