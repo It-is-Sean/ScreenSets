@@ -3,7 +3,7 @@
 Quickly switch display presets from your menu bar, Spotlight, or the app dashboard.
 
 
-## Features:
+## 1. Features:
 - Dashboard for managing all the items
 <img width="729" height="816" alt="截屏2026-08-29 22 24 50" src="https://github.com/user-attachments/assets/15c1d811-70a8-4527-b265-786c6b9251e6" />
 
@@ -15,9 +15,37 @@ Quickly switch display presets from your menu bar, Spotlight, or the app dashboa
 <img width="255" height="216" alt="image" src="https://github.com/user-attachments/assets/de04945d-468c-47bd-93af-be320f237d4f" />
 
 ---
-## Demo
+## 2. Demo
 
 https://github.com/user-attachments/assets/f8dbe2c4-1f5c-4f69-9de0-4be38e507069
 
 ---
-## 
+
+## 3. Usage
+
+1. Launch **ScreenSets**. The app runs from the menu bar.
+2. Arrange your displays in **System Settings** the way you want.
+3. Open ScreenSets and click **Add Preset** to save the current display configuration.
+4. Repeat this for any other display layouts you frequently use.
+5. Click a preset whenever you want to restore that configuration.
+
+ScreenSets can restore display arrangement, resolution, refresh rate, and mirroring settings.
+You can also search for your saved presets in **Spotlight** and apply them directly.
+
+## 4. Installation
+
+1. Download the latest release from the **Releases** page.
+2. Unzip the downloaded file.
+3. Move **ScreenSets.app** to your **Applications** folder.
+4. Open ScreenSets.
+
+Since ScreenSets is currently **not signed with an Apple Developer certificate**, macOS may block it the first time you open it.
+
+If that happens:
+
+1. Open **System Settings → Privacy & Security**.
+2. Scroll down and find the message saying that ScreenSets was blocked.
+3. Click **Open Anyway**.
+4. Confirm by clicking **Open**.
+
+You only need to do this once.
